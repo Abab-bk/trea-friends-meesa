@@ -256,6 +256,7 @@ export function createMeesa(canvas: HTMLCanvasElement): MeesaInstance {
   let startTime = performance.now();
   let frameCount = 0;
   let currentSource: any = null;
+  let animationCallback: ((t: number, f: number) => void) | null = null;
   let animationId: number | null = null;
   let texture: WebGLTexture | null = null;
 
@@ -314,15 +315,17 @@ export function createMeesa(canvas: HTMLCanvasElement): MeesaInstance {
 
   function render(source: Source) {
     currentSource = source;
+    draw();
   }
 
   function play(callback: (t: number, f: number) => void) {
+    animationCallback = callback;
     if (animationId !== null) cancelAnimationFrame(animationId);
 
     function loop() {
       const t = (performance.now() - startTime) / 1000;
       frameCount++;
-      callback(t, frameCount);
+      animationCallback?.(t, frameCount);
       draw();
       animationId = requestAnimationFrame(loop);
     }
