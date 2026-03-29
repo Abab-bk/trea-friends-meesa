@@ -136,7 +136,9 @@ const FRAGMENT_SHADER = `
     col = hsv2rgb(hsv);
     col = (col - 0.5) * con + 0.5 + br;
     if (inv == 1) col = 1.0 - col;
-    col = step(th, col);
+    if (th > 0.0) {
+      col = step(th, col);
+    }
     if (px > 1.0) {
       uv = floor(uv * px) / px;
     }
@@ -275,7 +277,7 @@ export function createMeesa(canvas: HTMLCanvasElement): MeesaInstance {
     let type = source.type === 'circle' ? 1 : source.type === 'rect' ? 2 : source.type === 'line' ? 3 : source.type === 'noise' ? 4 : source.type === 'gradient' ? 5 : 6;
     let radius = (source.props.radius as number) ?? 0.5;
     let position: [number, number] = [(source.props.x as number) ?? 0.5, (source.props.y as number) ?? 0.5];
-    let scale: [number, number] = [1, 1];
+    let scale: [number, number] = [source.type === 'rect' ? (source.props.width as number) ?? 1 : 1, source.type === 'rect' ? (source.props.height as number) ?? 1 : 1];
     let rotation = 0;
     let repeat: [number, number] = [1, 1];
     let scroll: [number, number] = [0, 0];
