@@ -111,23 +111,30 @@ const FRAGMENT_SHADER = `
     uv = fract(uv * rep);
 
     vec3 col = vec3(0.0);
+    float alpha = 0.0;
 
     if (st == 1) {
       float d = length(uv - 0.5);
-      col = vec3(1.0 - smoothstep(r - 0.01, r + 0.01, d));
+      alpha = 1.0 - smoothstep(r - 0.01, r + 0.01, d);
+      col = vec3(alpha);
     } else if (st == 2) {
       vec2 size = vec2(0.5) * scl;
       vec2 p = abs(uv - 0.5);
-      col = vec3(step(p.x, size.x) * step(p.y, size.y));
+      alpha = step(p.x, size.x) * step(p.y, size.y);
+      col = vec3(alpha);
     } else if (st == 3) {
       float thickness = 0.02;
       float d = distance(uv, vec2(0.0));
-      col = vec3(step(d, r) * step(r - thickness, d));
+      alpha = step(d, r) * step(r - thickness, d);
+      col = vec3(alpha);
     } else if (st == 4) {
+      alpha = 1.0;
       col = vec3(fbm(uv * 4.0 + u_time * 0.5));
     } else if (st == 5) {
+      alpha = 1.0;
       col = vec3(uv.x, uv.x, uv.x);
     } else if (st == 6) {
+      alpha = 1.0;
       col = texture2D(u_texture, uv).rgb;
     }
 
@@ -144,12 +151,13 @@ const FRAGMENT_SHADER = `
     if (inv == 1) col = 1.0 - col;
     if (th > 0.0) {
       col = step(th, col);
+      alpha = step(th, alpha);
     }
     if (px > 1.0) {
       uv = floor(uv * px) / px;
     }
 
-    return vec4(col, 1.0);
+    return vec4(col, alpha);
   }
 
   void main() {
