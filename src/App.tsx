@@ -8,25 +8,30 @@ type Demo = {
 
 const demos: Demo[] = [
   {
-    name: 'Pulsing Circle',
+    name: 'Pulsing Rainbow Circle',
     render: (m) => {
       m.play((t) => {
         m.render(
           geo.circle(Math.sin(t) * 0.2 + 0.3)
-            .move(Math.sin(t) * 0.5, 0)
+            .move(Math.sin(t) * 0.5, Math.cos(t) * 0.3)
+            .hue(t * 60)
+            .saturate(2)
+            .brightness(0.3 + Math.sin(t * 2) * 0.2)
             .out()
         );
       });
     },
   },
   {
-    name: 'Animated Noise',
+    name: 'Trippy Noise',
     render: (m) => {
       m.play((t) => {
         m.render(
           noise()
             .scale(2 + Math.sin(t) * 0.5)
             .rotate(t * 0.2)
+            .hue(t * 45)
+            .saturate(1.8)
             .brightness(0.8 + Math.sin(t * 2) * 0.2)
             .out()
         );
@@ -34,125 +39,183 @@ const demos: Demo[] = [
     },
   },
   {
-    name: 'Gradient',
+    name: 'Colorful Gradient',
     render: (m) => {
-      m.render(gradient().out());
+      m.play((t) => {
+        m.render(
+          gradient()
+            .hue(t * 30)
+            .saturate(1.5)
+            .out()
+        );
+      });
     },
   },
   {
-    name: 'Geometric Layers',
+    name: 'Psychedelic Layers',
     render: (m) => {
       m.play((t) => {
         m.render(
           layer(
-            geo.rect(0.8, 0.8).rotate(t * 0.1).out(),
-            geo.circle(0.4).move(Math.sin(t) * 0.3, 0).out(),
-            noise().pixelate(4).out()
+            geo.rect(0.8, 0.8).rotate(t * 0.1).hue(t * 20).saturate(1.5).out(),
+            geo.circle(0.4).move(Math.sin(t) * 0.3, Math.cos(t) * 0.3).hue(t * 30 + 180).saturate(2).out(),
+            noise().pixelate(4).hue(t * 60).saturate(1.2).out()
           )
         );
       });
     },
   },
   {
-    name: 'Rotated Rect',
+    name: 'Rotating Color Rect',
     render: (m) => {
       m.play((t) => {
         m.render(
           geo.rect(0.3, 0.3)
             .rotate(t)
             .move(0.5, 0.5)
+            .hue(t * 90)
+            .saturate(2)
+            .brightness(0.3)
             .out()
         );
       });
     },
   },
   {
-    name: 'Scaled Shapes',
+    name: 'Scaled Rainbow Shapes',
     render: (m) => {
       m.play((t) => {
         m.render(
           geo.circle(0.2)
             .scale(1 + Math.sin(t) * 0.5, 1 + Math.cos(t) * 0.5)
+            .hue(t * 60)
+            .saturate(2)
             .out()
         );
       });
     },
   },
   {
-    name: 'Repeated Pattern',
+    name: 'Colorful Grid Pattern',
     render: (m) => {
-      m.render(
-        geo.circle(0.15)
-          .repeat(4, 3)
-          .out()
-      );
+      m.play((t) => {
+        m.render(
+          geo.circle(0.15)
+            .repeat(4, 3)
+            .hue(t * 30)
+            .saturate(1.8)
+            .out()
+        );
+      });
     },
   },
   {
-    name: 'Scrolling UV',
+    name: 'Rainbow Scrolling Noise',
     render: (m) => {
       m.play((t) => {
         m.render(
           noise()
             .scroll(t * 0.1, t * 0.05)
+            .hue(t * 45)
+            .saturate(1.5)
             .out()
         );
       });
     },
   },
   {
-    name: 'Color Adjustments',
+    name: 'Intense Color Wave',
     render: (m) => {
       m.play((t) => {
         m.render(
           noise()
-            .hue(t * 30)
-            .saturate(1.5)
-            .contrast(1.2)
+            .hue(t * 60)
+            .saturate(2)
+            .contrast(1.5)
+            .brightness(0.2 + Math.sin(t * 2) * 0.1)
             .out()
         );
       });
     },
   },
   {
-    name: 'Threshold & Pixelate',
+    name: 'Trippy Pixelation',
     render: (m) => {
       m.play((t) => {
         m.render(
           noise()
             .thres(Math.sin(t) * 0.3 + 0.5)
             .pixelate(8 + Math.sin(t) * 4)
+            .hue(t * 30)
+            .saturate(1.8)
             .out()
         );
       });
     },
   },
   {
-    name: 'Brightness Pulse',
+    name: 'Colorful Pulse',
     render: (m) => {
       m.play((t) => {
         m.render(
           geo.rect(0.5, 0.5)
             .move(0.5, 0.5)
             .brightness(Math.sin(t * 2) * 0.5)
+            .hue(t * 60)
+            .saturate(2)
             .out()
         );
       });
     },
   },
   {
-    name: 'Invert Effect',
+    name: 'Psychedelic Inversion',
     render: (m) => {
       m.play((t) => {
         m.render(
           noise()
             .invert(Math.sin(t) > 0)
+            .hue(t * 45)
+            .saturate(1.5)
+            .out()
+        );
+      });
+    },
+  },
+  {
+    name: 'Rainbow Kaleidoscope',
+    render: (m) => {
+      m.play((t) => {
+        m.render(
+          layer(
+            geo.circle(0.15).move(0.3, 0.3).hue(t * 60).saturate(2).out(),
+            geo.circle(0.15).move(0.7, 0.3).hue(t * 60 + 60).saturate(2).out(),
+            geo.circle(0.15).move(0.3, 0.7).hue(t * 60 + 120).saturate(2).out(),
+            geo.circle(0.15).move(0.7, 0.7).hue(t * 60 + 180).saturate(2).out(),
+            geo.circle(0.2).move(0.5, 0.5).hue(t * 60 + 240).saturate(2).out()
+          )
+        );
+      });
+    },
+  },
+  {
+    name: 'Colorful Fractal Noise',
+    render: (m) => {
+      m.play((t) => {
+        m.render(
+          noise()
+            .scale(3 + Math.sin(t) * 0.5)
+            .scroll(t * 0.05, t * 0.03)
+            .hue(t * 30)
+            .saturate(1.8)
+            .contrast(1.3)
             .out()
         );
       });
     },
   },
 ];
+
 
 const defaultCode = `// Available: geo, noise, gradient, layer, m
 // Examples:
@@ -162,30 +225,45 @@ const defaultCode = `// Available: geo, noise, gradient, layer, m
 //    m.render(noise().rotate(t).out());
 //  });
 
-// Animated geometric pattern
+// Psychedelic animated pattern
 m.play((t) => {
   m.render(
     layer(
+      noise()
+        .scale(2 + Math.sin(t * 0.5) * 0.3)
+        .hue(t * 45)
+        .saturate(1.5)
+        .brightness(0.3)
+        .out(),
       geo.circle(0.2)
-        .move(0.5, 0.5)
+        .move(0.5 + Math.sin(t * 0.3) * 0.2, 0.5 + Math.cos(t * 0.3) * 0.2)
         .scale(1 + Math.sin(t) * 0.3)
         .rotate(t * 0.1)
+        .hue(t * 60)
+        .saturate(2)
         .out(),
       geo.rect(0.15, 0.15)
-        .move(0.3, 0.3)
+        .move(0.3 + Math.sin(t * 0.4) * 0.1, 0.3 + Math.cos(t * 0.4) * 0.1)
         .rotate(t * 0.2)
+        .hue(t * 60 + 60)
+        .saturate(2)
         .out(),
       geo.rect(0.15, 0.15)
-        .move(0.7, 0.7)
+        .move(0.7 + Math.sin(t * 0.5) * 0.1, 0.7 + Math.cos(t * 0.5) * 0.1)
         .rotate(t * -0.2)
+        .hue(t * 60 + 120)
+        .saturate(2)
         .out(),
-      noise()
-        .scale(3)
-        .brightness(0.2)
+      geo.circle(0.05)
+        .move(0.5, 0.5)
+        .hue(t * 60 + 180)
+        .saturate(2)
+        .brightness(0.5)
         .out()
     )
   );
 });`;
+
 
 const App: Component = () => {
   let canvasRef: HTMLCanvasElement | undefined;

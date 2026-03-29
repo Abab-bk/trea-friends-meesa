@@ -56,6 +56,7 @@ const FRAGMENT_SHADER = `
   uniform float u_layersThres[8];
   uniform float u_layersPixelate[8];
   uniform int u_layersType[8];
+  uniform float u_layersRadius[8];
   uniform int u_layerType;
 
   vec3 rgb2hsv(vec3 c) {
@@ -130,6 +131,11 @@ const FRAGMENT_SHADER = `
       col = texture2D(u_texture, uv).rgb;
     }
 
+    // Create color from hue if saturation is high
+    if (sat > 1.0) {
+      col = hsv2rgb(vec3(h / 360.0, 1.0, col.r));
+    }
+    
     vec3 hsv = rgb2hsv(col);
     hsv.x = fract(hsv.x + h / 360.0);
     hsv.y *= sat;
@@ -154,7 +160,7 @@ const FRAGMENT_SHADER = `
       for (int i = 0; i < 8; i++) {
         if (i >= u_layerCount) break;
         vec4 layer = sampleSource(
-          uv, u_layersType[i], u_radius, u_layersPos[i], u_layersScale[i], u_layersRot[i],
+          uv, u_layersType[i], u_layersRadius[i], u_layersPos[i], u_layersScale[i], u_layersRot[i],
           u_layersRepeat[i], u_layersScroll[i], u_layersBrightness[i], u_layersContrast[i],
           u_layersSaturate[i], u_layersHue[i], u_layersInvert[i], u_layersThres[i], u_layersPixelate[i]
         );
@@ -192,6 +198,7 @@ function createProgram(gl: WebGLRenderingContext): WebGLProgram {
 
 interface LayerData {
   type: number;
+  radius: number;
   pos: [number, number];
   scale: [number, number];
   rot: number;
@@ -241,6 +248,7 @@ export function createMeesa(canvas: HTMLCanvasElement): MeesaInstance {
 
   const layerLocs = {
     type: gl.getUniformLocation(program, 'u_layersType'),
+    radius: gl.getUniformLocation(program, 'u_layersRadius'),
     pos: gl.getUniformLocation(program, 'u_layersPos'),
     scale: gl.getUniformLocation(program, 'u_layersScale'),
     rot: gl.getUniformLocation(program, 'u_layersRot'),
@@ -312,7 +320,7 @@ export function createMeesa(canvas: HTMLCanvasElement): MeesaInstance {
       }
     }
 
-    return { type, pos: position, scale, rot: rotation, repeat, scroll, brightness, contrast, saturate, hue, invert, thres: threshold, pixelate };
+    return { type, radius, pos: position, scale, rot: rotation, repeat, scroll, brightness, contrast, saturate, hue, invert, thres: threshold, pixelate };
   }
 
   function render(source: Source) {
@@ -347,6 +355,7 @@ export function createMeesa(canvas: HTMLCanvasElement): MeesaInstance {
       gl.uniform1i(uLayerCount, layers.length);
 
       const types = new Int32Array(8);
+      const radii = new Float32Array(8);
       const positions = new Float32Array(16);
       const scales = new Float32Array(16);
       const rots = new Float32Array(8);
@@ -362,6 +371,7 @@ export function createMeesa(canvas: HTMLCanvasElement): MeesaInstance {
 
       layers.forEach((l: LayerData, i: number) => {
         types[i] = l.type;
+        radii[i] = l.radius;
         positions[i * 2] = l.pos[0];
         positions[i * 2 + 1] = l.pos[1];
         scales[i * 2] = l.scale[0];
@@ -381,6 +391,7 @@ export function createMeesa(canvas: HTMLCanvasElement): MeesaInstance {
       });
 
       gl.uniform1iv(layerLocs.type!, types);
+      gl.uniform1fv(layerLocs.radius!, radii);
       gl.uniform2fv(layerLocs.pos!, positions);
       gl.uniform2fv(layerLocs.scale!, scales);
       gl.uniform1fv(layerLocs.rot!, rots);
