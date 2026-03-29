@@ -162,7 +162,30 @@ const defaultCode = `// Available: geo, noise, gradient, layer, m
 //    m.render(noise().rotate(t).out());
 //  });
 
-m.render(geo.circle(0.3).out());`;
+// Animated geometric pattern
+m.play((t) => {
+  m.render(
+    layer(
+      geo.circle(0.2)
+        .move(0.5, 0.5)
+        .scale(1 + Math.sin(t) * 0.3)
+        .rotate(t * 0.1)
+        .out(),
+      geo.rect(0.15, 0.15)
+        .move(0.3, 0.3)
+        .rotate(t * 0.2)
+        .out(),
+      geo.rect(0.15, 0.15)
+        .move(0.7, 0.7)
+        .rotate(t * -0.2)
+        .out(),
+      noise()
+        .scale(3)
+        .brightness(0.2)
+        .out()
+    )
+  );
+});`;
 
 const App: Component = () => {
   let canvasRef: HTMLCanvasElement | undefined;
@@ -173,24 +196,38 @@ const App: Component = () => {
   const [error, setError] = createSignal('');
 
   onMount(() => {
-    if (canvasRef) {
-      meesa = createMeesa(canvasRef);
-      demos[currentDemo()].render(meesa);
-    }
+    // Wait for next tick to ensure canvasRef is available
+    setTimeout(() => {
+      if (canvasRef) {
+        meesa = createMeesa(canvasRef);
+        demos[currentDemo()].render(meesa);
+      }
+    }, 100);
   });
 
   function selectDemo(index: number) {
     setIsEditor(false);
     setCurrentDemo(index);
     setError('');
-    if (meesa) {
-      demos[index].render(meesa);
-    }
+    // Re-initialize meesa with the new canvas element
+    setTimeout(() => {
+      if (canvasRef) {
+        meesa = createMeesa(canvasRef);
+        demos[index].render(meesa);
+      }
+    }, 100);
   }
 
   function openEditor() {
     setIsEditor(true);
     setError('');
+    // Re-initialize meesa with the new canvas element
+    setTimeout(() => {
+      if (canvasRef) {
+        meesa = createMeesa(canvasRef);
+        runCode();
+      }
+    }, 100);
   }
 
   function runCode() {
@@ -243,9 +280,9 @@ const App: Component = () => {
           </nav>
         </aside>
 
-        <main class="flex-1 flex flex-col items-center justify-center p-8 bg-neutral-900">
+        <main class="flex-1 flex flex-col p-8 bg-neutral-900">
           <Show when={isEditor()}>
-            <div class="w-full max-w-4xl flex flex-col gap-4">
+            <div class="w-full max-w-6xl flex flex-col gap-4">
               <div class="flex gap-2">
                 <button
                   class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded text-sm font-medium transition-colors"
@@ -254,29 +291,43 @@ const App: Component = () => {
                   ▶ Run
                 </button>
               </div>
-              <textarea
-                class="w-full h-64 p-4 bg-neutral-800 border border-neutral-600 rounded font-mono text-sm text-green-400 resize-none focus:outline-none focus:border-emerald-500"
-                value={code()}
-                onInput={(e) => setCode(e.currentTarget.value)}
-                spellcheck={false}
-              />
-              <Show when={error()}>
-                <div class="text-red-400 text-sm bg-red-900/30 border border-red-800 rounded p-2">
-                  {error()}
+              <div class="flex flex-col md:flex-row gap-4 flex-1">
+                <div class="w-full md:w-1/2">
+                  <textarea
+                    class="w-full h-full min-h-[300px] p-4 bg-neutral-800 border border-neutral-600 rounded font-mono text-sm text-green-400 resize-none focus:outline-none focus:border-emerald-500"
+                    value={code()}
+                    onInput={(e) => setCode(e.currentTarget.value)}
+                    spellcheck={false}
+                  />
+                  <Show when={error()}>
+                    <div class="mt-2 text-red-400 text-sm bg-red-900/30 border border-red-800 rounded p-2">
+                      {error()}
+                    </div>
+                  </Show>
                 </div>
-              </Show>
+                <div class="w-full md:w-1/2">
+                  <div class="w-full aspect-video bg-black rounded-lg overflow-hidden shadow-2xl border border-neutral-700">
+                    <canvas ref={canvasRef} class="w-full h-full" />
+                  </div>
+                  <div class="mt-4 text-center">
+                    <span class="text-emerald-400 font-medium">Editor Preview</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </Show>
 
           <Show when={!isEditor()}>
-            <div class="w-full max-w-3xl aspect-video bg-black rounded-lg overflow-hidden shadow-2xl border border-neutral-700">
-              <canvas ref={canvasRef} class="w-full h-full" />
-            </div>
-            <div class="mt-6 text-center">
-              <span class="text-emerald-400 font-medium">{demos[currentDemo()].name}</span>
-              <p class="text-neutral-500 text-sm mt-1">
-                Demo {currentDemo() + 1} of {demos.length}
-              </p>
+            <div class="flex-1 flex flex-col items-center justify-center">
+              <div class="w-full max-w-3xl aspect-video bg-black rounded-lg overflow-hidden shadow-2xl border border-neutral-700">
+                <canvas ref={canvasRef} class="w-full h-full" />
+              </div>
+              <div class="mt-6 text-center">
+                <span class="text-emerald-400 font-medium">{demos[currentDemo()].name}</span>
+                <p class="text-neutral-500 text-sm mt-1">
+                  Demo {currentDemo() + 1} of {demos.length}
+                </p>
+              </div>
             </div>
           </Show>
         </main>
